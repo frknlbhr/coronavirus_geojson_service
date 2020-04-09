@@ -58,6 +58,9 @@ public class Covid19DataCsvParserImpl implements Covid19DataCsvParser {
             List<Feature> featureList = new ArrayList<>();
 
             for (CSVRecord caseRecord : parsedCaseCsvDatas) {
+                if (StringUtils.isEmpty(caseRecord.get(CSVFileConstants.LONGITUDE_COLUMN_HEADER)) || StringUtils.isEmpty(caseRecord.get(CSVFileConstants.LATITUDE_COLUMN_HEADER)))
+                    continue;
+
                 double longitude = Double.parseDouble(caseRecord.get(CSVFileConstants.LONGITUDE_COLUMN_HEADER));
                 double latitude = Double.parseDouble(caseRecord.get(CSVFileConstants.LATITUDE_COLUMN_HEADER));
                 Point point = GeometryUtils.createPoint(new Coordinate(longitude, latitude));
