@@ -11,7 +11,7 @@ import org.locationtech.jts.geom.Polygon;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 import org.wololo.geojson.Feature;
@@ -31,23 +31,26 @@ import java.util.Map;
  * created at 24.03.2020
  */
 
-@Component
+@Service
 public class Covid19DataCsvParserImpl implements Covid19DataCsvParser {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Covid19DataCsvParserImpl.class);
 
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM-dd-yyyy");
 
+    private final RestTemplate restTemplate;
+
     @Autowired
-    private RestTemplate restTemplate;
+    public Covid19DataCsvParserImpl(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
+    }
+
 
     public FeatureCollection parseToGeojsonFeature() {
 
-        LocalDate todayDate = LocalDate.now().minusDays(1);
-        String today = formatter.format(todayDate);
-        String CSV_URL = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/" + today + ".csv";
-
+        String CSV_URL = getRecentCSVUrl();
         String caseCsvDatas = restTemplate.getForObject(CSV_URL, String.class);
+
         if (StringUtils.isEmpty(caseCsvDatas)) {
             LOGGER.error("Covid19DataCsvParserImpl : parse(),  No data received from daily report csv!");
             throw new RuntimeException("Covid19DataCsvParserImpl : parse(),  No data received from daily report csv!");
@@ -74,6 +77,7 @@ public class Covid19DataCsvParserImpl implements Covid19DataCsvParser {
                 }
                 featureList.add(new Feature(geometry, preparePropertiesForFeature(caseRecord)));
             }
+
             return JtsGeojsonHelper.convertFeatureListToFeatureCollection(featureList);
 
         } catch (IOException e) {
@@ -94,6 +98,14 @@ public class Covid19DataCsvParserImpl implements Covid19DataCsvParser {
         properties.put("Recovered", Integer.parseInt(caseRecord.get(CSVFileConstants.RECOVERED_COLUMN_HEADER)));
         properties.put("Active", Integer.parseInt(caseRecord.get(CSVFileConstants.ACTIVE_COLUMN_HEADER)));
         return properties;
+    }
+
+
+    private String getRecentCSVUrl() {
+
+        LocalDate yesterdayDate = LocalDate.now().minusDays(1);
+        String yesterdayAsString = formatter.format(yesterdayDate);
+        return "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/" + yesterdayAsString + ".csv";
     }
 
 }

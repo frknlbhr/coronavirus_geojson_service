@@ -1,5 +1,6 @@
-package ilbahar.furkan.corona_geojson_service.service;
+package ilbahar.furkan.corona_geojson_service.web;
 
+import ilbahar.furkan.corona_geojson_service.service.Covid19DataCsvParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,13 +17,18 @@ import org.wololo.geojson.FeatureCollection;
 
 @RestController
 @CrossOrigin(origins = "*")
-@RequestMapping("/Covid19Service")
+@RequestMapping("/covid19")
 public class Covid19RestService {
 
-    @Autowired
-    private Covid19DataCsvParser covid19DataCsvParser;
+    private final Covid19DataCsvParser covid19DataCsvParser;
 
-    @RequestMapping(value = "/allAsGeojson", method = RequestMethod.GET)
+    @Autowired
+    public Covid19RestService(Covid19DataCsvParser covid19DataCsvParser) {
+        this.covid19DataCsvParser = covid19DataCsvParser;
+    }
+
+
+    @RequestMapping(value = "/asGeojson", method = RequestMethod.GET)
     public ResponseEntity<FeatureCollection> getAllDataAsGeojson() {
 
         FeatureCollection result = covid19DataCsvParser.parseToGeojsonFeature();
