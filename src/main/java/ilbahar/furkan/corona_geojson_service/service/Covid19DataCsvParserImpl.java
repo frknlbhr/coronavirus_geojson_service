@@ -69,12 +69,15 @@ public class Covid19DataCsvParserImpl implements Covid19DataCsvParser {
                 Point point = GeometryUtils.createPoint(new Coordinate(longitude, latitude));
 
                 org.wololo.geojson.Geometry geometry;
+/*
                 if (!"0".equals(caseRecord.get(CSVFileConstants.CONFIRMED_COLUMN_HEADER))) {
-                    Polygon bufferedPoint = GeometryUtils.bufferPoint(point, 5 * Double.parseDouble(caseRecord.get(CSVFileConstants.CONFIRMED_COLUMN_HEADER)));
+                    Polygon bufferedPoint = GeometryUtils.bufferPoint(point, 0.05d * Double.parseDouble(caseRecord.get(CSVFileConstants.CONFIRMED_COLUMN_HEADER)));
                     geometry = JtsGeojsonHelper.convertJtsGeometryToGeoJson(bufferedPoint);
                 } else {
                     geometry = JtsGeojsonHelper.convertJtsGeometryToGeoJson(point);
                 }
+*/
+                geometry = JtsGeojsonHelper.convertJtsGeometryToGeoJson(point);
                 featureList.add(new Feature(geometry, preparePropertiesForFeature(caseRecord)));
             }
 
@@ -103,7 +106,7 @@ public class Covid19DataCsvParserImpl implements Covid19DataCsvParser {
 
     private String getRecentCSVUrl() {
 
-        LocalDate yesterdayDate = LocalDate.now().minusDays(1);
+        LocalDate yesterdayDate = LocalDate.now().minusDays(2);
         String yesterdayAsString = formatter.format(yesterdayDate);
         return "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/" + yesterdayAsString + ".csv";
     }
